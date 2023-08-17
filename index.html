@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!-- Load Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- React CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+    </script>
+
+    <style>
+        .card-body img {
+            width: 100%;
+            height: auto;
+            padding: 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const imagesList = [
+            { title: "致災雨襲台", logoImgURL: "https://cc.tvbs.com.tw/img/upload/2022/09/08/20220908202256-527b28aa.jpg", link: "https://news.tvbs.com.tw/pack/packdetail/943" },
+            { title: "高虹安遭起訴", logoImgURL: "https://cc.tvbs.com.tw/img/upload/2023/08/14/20230814105223-0e623e5f.jpg", link: "https://news.tvbs.com.tw/pack/packdetail/809" },
+            { title: "夏威夷末日野火", logoImgURL: "https://cc.tvbs.com.tw/img/upload/2023/08/12/20230812095924-3b962692.jpg", link: "https://news.tvbs.com.tw/pack/packdetail/994" }
+        ];
+        function Card(props){
+            return (
+                <>
+                <div className="card">
+                    <h2 style={{padding: '10px'}}>{props.image.title}</h2>
+                    <div className="card-body">
+                        <a href={props.image.link}><img src={props.image.logoImgURL} alt={props.image.title} style={{padding: '10px'}} /></a>
+                    </div>
+                </div>
+                </>
+            );
+        }
+        function App() {
+            return (
+                <div className="container">
+                    <div className="row">
+                        {imagesList.map((image, index) => (
+                            <div className="col col-3" key={index}>
+                                <Card image={image} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+       
+        // Debugging code
+        console.log("Debugging...");
+
+        // React initialization code
+        ReactDOM.render(
+            <App />,
+            document.getElementById('root')
+        );
+    </script>
+
+</body>
+
+</html>
