@@ -21,6 +21,9 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
     </script>
 
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">  
+
     <!-- 引入 Masonry 函式庫 -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://masonry.desandro.com/masonry.pkgd.js"></script>
@@ -39,6 +42,12 @@
             /* 固定圖片，使其在滾動時保持不變 */
         }
 
+        .card-frame {
+            flex: 0 0 auto;
+            width: 33.33333333%;
+            padding: 5px;
+        }
+
         .card {
             background-color: #696969;
             border-radius: 10px;
@@ -46,6 +55,10 @@
             box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
             /* 調整數值以獲得適合的陰影效果 */
             transition: background-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .card h2 {
@@ -61,23 +74,22 @@
             height: 100%;
             /* 設定標題的高度為 100% */
             color: white;
+            padding: 10px;
         }
 
-        .card-frame {
-            flex: 0 0 auto;
-            width: 33.33333333%;
-            padding: 5px;
+        .card-body{
+            padding: 10px;
         }
 
         .card-body img {
             background-color: #FFFFFF;
             width: 100%;
             height: auto;
-            padding: 0px;
             border: none;
             /* 移除實線邊框 */
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
             /* 添加陰影效果 */
+            padding: 10px;
         }
 
         .card.cardIsHover {
@@ -88,6 +100,16 @@
             color: black;
             /* 鼠標懸停時的文字顏色 */
         }
+
+        .card .title {
+            text-align: center; /* 將文字在輸入框中置中 */
+            text-indent: 0; /* 清除文字縮進 */
+            width: 80%; /* 確保輸入框佔滿整個寬度 */
+            margin-top: 10px;
+            font-size: 24px; /* 設定文字大小為 24 像素，或根據你的需要調整 */
+            font-weight: bold; /* 設定文字粗體 */
+            font-family: Arial, sans-serif; /* 設定字體（形體）為 Arial 或其他 sans-serif 字體 */
+        }
     </style>
 
 </head>
@@ -97,11 +119,10 @@
     <div id="root"></div>
 
     <script type="text/babel">
-
-      
-
         // 在 CardForm 組件中
-        function CardForm({ onSubmit, setImagesList }) {  // 加入 setImagesList 作為組件的屬性
+        function CardForm({ onSubmit, setCardData }) { 
+            // 注意這邊是解構賦值, onSubmit 也是 props 屬性對象之一
+            // 我們創建CardForm 組件時, 同時以屬性帶入資料 CardData, 以及方法 setCardData
             const [title, setTitle] = React.useState('');
             const [link, setLink] = React.useState('');
             const [selectedImage, setSelectedImage] = React.useState(null);
@@ -116,7 +137,8 @@
                     reader.readAsDataURL(file);
                 }
             };
-
+            
+            // 當點擊送出時
             const handleSubmit = (e) => {
                 e.preventDefault();
 
@@ -128,50 +150,62 @@
                 };
 
                 // 將新的卡片加入圖片列表數據
-                setImagesList(prevImages => [...prevImages, newCard]);
-
-                // 強制重新渲染主應用組件
-                ReactDOM.render(
-                    <App />,
-                    document.getElementById('root')
-                );
-
+                // 當 CardDatas 被改變時, 會觸發 useEffect
+                setCardData(prevCards => [...prevCards, newCard]);
+                
                 // 清空表單輸入和已選擇的圖片
                 setTitle('');
                 setLink('');
                 setSelectedImage(null);
-
-            
-
             };
 
-            return (
-                <div className="card">
-                    <h2>新增卡片</h2>
-                    <div className="card-body">
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-3">
-                                <label className="form-label">Title</label>
-                                <input type="text" className="form-control" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            return (  
+                <form onSubmit={handleSubmit}>
+                    <div className="card">
+                        <input type="text" className="form-control title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                        <div className="card-body">
+                            {selectedImage ? ( // 如果相片已經被選取, 顯示相片
+                                <img
+                                    src={selectedImage}
+                                    onClick={() => document.getElementById('fileInput').click()}
+                                />
+                            ) : ( // 如果沒有被選取, 顯示icon
+                                <img
+                                    src="./public/相機圖片.jpeg"
+                                    onClick={() => document.getElementById('fileInput').click()}
+                                    style={{ width: '200px', height: '200px' }}
+                                />
+                            )}
+                            <input 
+                                type="file" 
+                                accept="image/*" // 允許所有影像檔案類型
+                                onChange={handleImageChange} 
+                                id="fileInput"
+                                style={{ display: 'none'}} // 隱藏元素
+                            />
+                        </div>
+                        <div className="card-url">
+                            <div className="row align-items-center">
+                                <div className="col-auto" style={{ padding: '0px' }}>
+                                    <h2 className="text-white">網址</h2>
+                                </div>
+                                <div className="col">
+                                    <input type="url" className="form-control" value={link} onChange={(e) => setLink(e.target.value)} required />
+                                </div>
                             </div>
-                            <div className="mb-3">
-                                <label className="form-label">Select Image</label>
-                                <input type="file" accept="image/*" onChange={handleImageChange} />
-                            </div>
-                            {selectedImage && <img src={selectedImage} alt="Selected" style={{ maxWidth: '100px' }} />}
-                            <div className="mb-3">
-                                <label className="form-label">Link</label>
-                                <input type="url" className="form-control" value={link} onChange={(e) => setLink(e.target.value)} required />
-                            </div>
-                            <button type="submit" className="btn btn-primary">點擊送出</button>
-                        </form>
+                        </div>
+                        <div className="d-flex justify-content-center align-items-center" style={{padding:'5px'}}>
+                            <button type="submit" className="btn btn-primary rounded-circle" style={{ fontSize: '24px' }}>
+                                <i className="fas fa-plus"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>   
             );
         }
 
         // 卡片組件
-        function Card(props){ // Card 屬性有 image 第 68 行 (前面的 image)
+        function Card({CardData}){ // Card 屬性有 CardData
             const [isHovered, setIsHovered] = React.useState(false);
 
             const handleMouseOver = () => {
@@ -180,22 +214,21 @@
             const handleMouseOut = () => {
                 setIsHovered(false);
             };
-            // Card 組件下的屬性 image 又包含屬性 link, title, logoImgURL
+            // Card 組件下的屬性 CardData 又包含屬性 link, title, logoImgURL
             return (
                 // 必須使用反引號 `` 才能使 Jquery 語法被解析, 不可使用 ""
                 <>
                 <div className={`card ${isHovered ? 'cardIsHover' : ''}`}>
-                    <h2 className={`${isHovered ? 'cardIsHover' : ''}`} 
-                        style={{padding: '10px'}}>
-                        {props.image.title}
+                    <h2 className={`${isHovered ? 'cardIsHover' : ''}`} >
+                        {CardData.title}
                     </h2>
                     <div className="card-body">
-                        <a href={props.image.link}>
-                            <img onMouseOver={handleMouseOver}
+                        <a href={CardData.link}>
+                            <img 
+                                onMouseOver={handleMouseOver}
                                 onMouseOut={handleMouseOut} 
-                                src={props.image.logoImgURL} 
-                                alt={props.image.title} 
-                                style={{padding: '10px'}} />
+                                src={CardData.logoImgURL} 
+                            />
                         </a>
                     </div>
                 </div>
@@ -204,49 +237,43 @@
         }
         
         // 主應用組件
-        
-
-function App() {
- 
-
-    // 圖片列表數據
-    const [imagesList, setImagesList] = React.useState([
-        { title: "小觀音山O型縱走", logoImgURL: "./public/小觀音山.jpeg", link: "https://hiking.biji.co/index.php?q=review&act=info&review_id=13378" },
-        { title: "大屯山系O型縱走", logoImgURL: "./public/大屯山.jpeg", link: "https://hiking.biji.co/index.php?q=trail&act=gpx_detail&id=28711" },
-        { title: "三進三出七星山", logoImgURL: "./public/七星山.jpeg", link: "https://hiking.biji.co/index.php?q=review&act=info&review_id=28816" },
-        { title: "苗栗加里山之旅", logoImgURL: "./public/加里山.jpg", link: "https://hiking.biji.co/index.php?q=trail&act=detail&id=249" }
-    ]);
-
+        function App() {
+            // 圖片列表數據
+            // 我們這邊給了他屬性 CardData 資料, 以及改變資料的方法 setCardData
+            const [CardDatas, setCardData] = React.useState([
+                { title: "小觀音山O型縱走", logoImgURL: "./public/小觀音山.jpeg", link: "https://hiking.biji.co/index.php?q=review&act=info&review_id=13378" },
+                { title: "大屯山系O型縱走", logoImgURL: "./public/大屯山.jpeg", link: "https://hiking.biji.co/index.php?q=trail&act=gpx_detail&id=28711" },
+                { title: "三進三出七星山", logoImgURL: "./public/七星山.jpeg", link: "https://hiking.biji.co/index.php?q=review&act=info&review_id=28816" },
+                { title: "苗栗加里山之旅", logoImgURL: "./public/加里山.jpg", link: "https://hiking.biji.co/index.php?q=trail&act=detail&id=249" }
+            ]);
 
             React.useEffect(() => {
-        // 確保Masonry已經初始化
-        if ($('.card-list').data('masonry')) {
-            $('.card-list').masonry('reloadItems').masonry('layout');
-        } else {
-            $('.card-list').masonry({
-                itemSelector: '.card-frame'
-            });
-        }
-    }, [imagesList]); // 當 imagesList 更新時觸發
-    
+                // 確保Masonry已經初始化
+                if ($('.card-list').data('masonry')) {
+                    $('.card-list').masonry('reloadItems').masonry('layout');
+                } else {
+                    $('.card-list').masonry({
+                        itemSelector: '.card-frame'
+                    });
+                }
+            }, [CardDatas]); // 當 CardData 更新時觸發
+        
             return (
                 <div className="container">
                     <div className="card-list">
-                        {imagesList.map((image, index) => (  // 這裡的 image 就是 imagesList 中的每一個元素
+                        {CardDatas.map((CardData, index) => (  // 這裡的 CardData 就是 CardDatas 中的每一個元素
                             <div className="card-frame" key={index}>  
-                                <Card image={image} /> 
+                                <Card CardData={CardData} /> 
                             </div>
                         ))}
-                    </div>
-                    <div className="row">
-                        <div className="col">
-                            <CardForm imagesList={imagesList} setImagesList={setImagesList} />
+                        <div className="card-frame">
+                            <CardForm CardDatas={CardDatas} setCardData={setCardData} /> 
                         </div>
                     </div>
                 </div>
             );
         }
-       
+        
         // 除錯代碼
         console.log("Debugging...");
 
